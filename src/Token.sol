@@ -6,18 +6,24 @@ pragma solidity ^0.8.30;
 // Library for basic token functionalities (transfer, balance checking, etc.)
 import { ERC20 } from "@openzeppelin/token/ERC20/ERC20.sol";
 
+import { Ownable } from "@openzeppelin/access/Ownable.sol";
+
 // Creates a contract named "Token" that inherits from the ERC20 standard
-contract Token is ERC20 {
+contract Token is ERC20, Ownable {
+    error ERC20ExceedsMaxMintAmount(uint256 _amount);
     // constructor adalah function yang dieksekusi pertama kali saat contract di-deploy
-    constructor() ERC20("Vidnarg", "VIDNARG") {
-        // Creates 100,000 tokens and gives them to whoever deploys the contract
-        _mint(msg.sender, 100000 * 10 ** decimals());
+    constructor() ERC20("Vidnarg", "VIDNARG") Ownable(msg.sender) {}
+
+    // Modifier seperti middleware yang menambahkan limitasi/validasi ke function
+    modifier maxMint(uint256 _amount) {
+        if(_amount > 1_000e19) revert ERC20ExceedsMaxMintAmount(_amount);
+        _;
     }
 
     // Creates new tokens out of thin air
     // Like a central bank printing new money
     // Use case: reward users, create initial token distribution
-    function mint(address to, uint256 amount) public {
+    function mint(address to, uint256 amount) public onlyOwner maxMint(amount){
         _mint(to, amount);
     }
 
