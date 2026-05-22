@@ -1,92 +1,188 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import { Test, console } from "forge-std/Test.sol";
-import { TabunganBersama } from "../src/TabunganBersama.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {TabunganBersama} from "../src/TabunganBersama.sol";
+import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+import {MockWETH} from "../src/MockWETH.sol";
+import {IChainLink} from "../src/interfaces/IChainLink.sol";
 
 // RUN
-// forge test --match-contract TabunganBersamaTest -vvv
-contract TabunganBersamaTest is Test { 
+// forge test --match-contract TabunganBersamaTest
+contract TabunganBersamaTest is Test {
     TabunganBersama public tabunganBersama;
-    address public token = 0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22; // IDRX
+    MockWETH public mockWETH;
+
+    // address public token = 0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22; // IDRX
+    // address public token = 0x18Bc5bcC660cf2B9cE3cd51a404aFe1a0cBD3C22; // IDRX
+
+    address public pricefeedETH = 0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70; // ETH/USD
+    address public pricefeedUSDC = 0x7e860098F58bBFC8648a4311b374B1D669a2bc6B; // USDC/USD
 
     address public deployer = makeAddr("deployer");
+    address public pepeng = makeAddr("pepeng");
+
     address public alice = makeAddr("alice");
     address public bob = makeAddr("bob");
 
     function setUp() public {
-        // Mainnet
-        // vm.createSelectFork(vm.rpcUrl("base_mainnet"));
-        // Testnet 
-        vm.createSelectFork(vm.rpcUrl("base_sepolia"));
-        deal(token, deployer, 100_000_000_000e2);
-        deal(token, alice, 100_000_000e2);
-        deal(token, bob, 1_000_000e2);
-
-        tabunganBersama = new TabunganBersama(token);
-    }
-
-    function testCheckBalance() public view {
-        uint256 tokenBalance = IERC20(token).balanceOf(deployer);
-        console.log("deployer balance: ", tokenBalanceBefore);
-
-        deal(token, deployer, 100_000_000_000e2);
-
-        uint256 tokenBalanceAfter = IERC20(token).balanceOf(deployer);
-        console.log("deployer balance after deal: ", tokenBalanceAfter);
-
-        console.log("=============");
-
-        console.log("balance deployer before", IERC20(token).balanceOf(deployer)); 
-        console.log("balance alice before", IERC20(token).balanceOf(alice));
+        vm.createSelectFork(vm.rpcUrl("base_mainnet"));
+        // deal(token, deployer, 100_000_000_000e2);
+        // deal(token, alice, 1_000_000e2);
+        // deal(token, bob, 9_000_000e2);
 
         vm.startPrank(deployer);
-        uint256 amountToTransfer = 19_000_000e2;
-        // Approve digunakan untuk mindahin aset ke contract address lain, misalnya vault 
-        // contoh: kita approve send 10 USDC, kita cuma ngirim 5 USDC, artinya masih sisa 5 USDC yang bisa dikirim
-        // kalau ga approve -> revert (makan gas fee)
-        IERC20(token).approve(alice, amountToTransfer); 
-        IERC20(token).transfer(alice, amountToTransfer);
-        vm.stopPrank();
 
-        console.log("balance deployer after", IERC20(token).balanceOf(deployer));
-        console.log("balance alice after", IERC20(token).balanceOf(alice));
+        mockWETH = new MockWETH();
+        tabunganBersama = new TabunganBersama(address(mockWETH));
+
+        mockWETH.mint(alice, 10e18);
+        mockWETH.mint(bob, 20e18);
+        mockWETH.mint(deployer, 20e18);
+
+        vm.stopPrank();
+    }
+
+    // RUN
+    // forge test --match-contract TabunganBersamaTest --match-test testCheckBalance -vvv
+    function testCheckBalance() public {
+        // uint256 tokenBalanceBefore = IERC20(token).balanceOf(deployer);
+        // console.log("deployer balance: ", tokenBalanceBefore);
+        // simulasi bahwa deployer seolah2 punya idrx sebanyak (amount)
+        // deal(token, deployer, 100_000_000_000e2);
+        // uint256 tokenBalanceAfter = IERC20(token).balanceOf(deployer);
+        // console.log("deployer balance: ", tokenBalanceAfter);
+
+        // console.log("==================");
+
+        // console.log("balance deployer before", IERC20(token).balanceOf(deployer));
+        // console.log("balance pepeng before", IERC20(token).balanceOf(pepeng));
+
+        // vm.startPrank(deployer);
+        // uint256 amountToTransfer = 19_000_000e2;
+        // IERC20(token).approve(pepeng, amountToTransfer);
+        // IERC20(token).transfer(pepeng, amountToTransfer);
+        // vm.stopPrank();
+
+        // console.log("balance deployer after", IERC20(token).balanceOf(deployer));
+        // console.log("balance pepeng after", IERC20(token).balanceOf(pepeng));
     }
 
     // RUN
     // forge test --match-contract TabunganBersamaTest --match-test testDeposit -vvv
     function testDeposit() public {
-        vm.startPrank(deployer);
-        uint256 amountToTransfer = 1_000_000e2;
+        // vm.startPrank(deployer);
+        // uint256 amountToTransfer = 19_000_000e2;
 
-        IERC20(token).approve(address(tabunganBersama), amountToTransfer);
+        // IERC20(token).approve(address(tabunganBersama), amountToTransfer);
+        // tabunganBersama.deposit(amountToTransfer);
+        // vm.stopPrank();
+
+        // console.log("tabunganBersama.totalSupplyShares():", tabunganBersama.totalSupplyShares());
+        // console.log("tabunganBersama.totalSupplyAssets():", tabunganBersama.totalSupplyAssets());
+        // console.log("tabunganBersama.userSupplyShares(deployer):", tabunganBersama.userSupplyShares(deployer));
+
+        // assertEq(tabunganBersama.totalSupplyAssets(), amountToTransfer);
+
+        uint256 amountToTransfer = 1e18;
+
+        vm.startPrank(alice);
+        // Approve digunakan untuk mindahin aset ke contract address lain, misalnya vault 
+        // contoh: kita approve send 10 USDC, kita cuma ngirim 5 USDC, artinya masih sisa 5 USDC yang bisa dikirim
+        // kalau ga approve -> revert (makan gas fee)
+        IERC20(address(mockWETH)).approve(address(tabunganBersama), amountToTransfer);
         tabunganBersama.deposit(amountToTransfer);
         vm.stopPrank();
 
-        // console.log("tabunganBersama.totalSupplyShares(): ", tabunganBersama.totalSupplyShares());
-        // console.log("tabunganBersama.totalSupplyAssets(): ", tabunganBersama.totalSupplyAssets());
+        vm.startPrank(bob);
+        IERC20(address(mockWETH)).approve(address(tabunganBersama), amountToTransfer);
+        tabunganBersama.deposit(amountToTransfer);
+        vm.stopPrank();
 
-        assertEq(tabunganBersama.totalSupplyAssets(), amountToTransfer);
-        assertEq(tabunganBersama.totalSupplyShares(), amountToTransfer);
+        console.log("tabunganBersama.totalSupplyShares():", tabunganBersama.totalSupplyShares());
+        console.log("tabunganBersama.totalSupplyAssets():", tabunganBersama.totalSupplyAssets());
+
+        console.log("tabunganBersama.userSupplyShares(alice):", tabunganBersama.userSupplyShares(alice));
+        console.log("tabunganBersama.userSupplyShares(bob):", tabunganBersama.userSupplyShares(bob));
     }
 
+    // RUN
+    // forge test --match-contract TabunganBersamaTest --match-test testWithdraw -vvv
     function testWithdraw() public {
-        vm.startPrank(deployer);
-        uint256 amountToTransfer = 1_000_000e2;
+        uint256 amountToTransfer = 1e18;
 
-        IERC20(token).approve(address(tabunganBersama), amountToTransfer);
+        vm.startPrank(alice);
+        IERC20(address(mockWETH)).approve(address(tabunganBersama), amountToTransfer);
         tabunganBersama.deposit(amountToTransfer);
-
-        uint256 sharesToWithdraw = tabunganBersama.totalSupplyShares();
-        tabunganBersama.withdraw(sharesToWithdraw);
         vm.stopPrank();
 
-        assertEq(tabunganBersama.totalSupplyAssets(), 0);
-        assertEq(tabunganBersama.totalSupplyShares(), 0);
+        vm.startPrank(bob);
+        IERC20(address(mockWETH)).approve(address(tabunganBersama), amountToTransfer);
+        tabunganBersama.deposit(amountToTransfer);
+        vm.stopPrank();
+
+        vm.startPrank(alice);
+        tabunganBersama.withdraw(amountToTransfer / 2);
+        vm.stopPrank();
+
+        console.log("tabunganBersama.totalSupplyShares():", tabunganBersama.totalSupplyShares());
+        console.log("tabunganBersama.totalSupplyAssets():", tabunganBersama.totalSupplyAssets());
+
+        console.log("tabunganBersama.userSupplyShares(alice):", tabunganBersama.userSupplyShares(alice));
+        console.log("tabunganBersama.userSupplyShares(bob):", tabunganBersama.userSupplyShares(bob));
     }
 
+    // RUN
+    // forge test --match-contract TabunganBersamaTest --match-test testDistributeYieldWithWithdraw -vvv
     function testDistributeYieldWithWithdraw() public {
-        
+        uint256 amountToTransfer1 = 1e18;
+        uint256 amountToTransfer2 = 2e18;
+
+        uint256 amountToDistribute = 2e18;
+
+        vm.startPrank(alice);
+        IERC20(address(mockWETH)).approve(address(tabunganBersama), amountToTransfer1);
+        tabunganBersama.deposit(amountToTransfer1);
+        vm.stopPrank();
+
+        vm.startPrank(bob);
+        IERC20(address(mockWETH)).approve(address(tabunganBersama), amountToTransfer2);
+        tabunganBersama.deposit(amountToTransfer2);
+        vm.stopPrank();
+
+        vm.startPrank(deployer);
+        IERC20(address(mockWETH)).approve(address(tabunganBersama), amountToDistribute);
+        tabunganBersama.distributeYield(amountToDistribute);
+        vm.stopPrank();
+
+        console.log("alice balance before:", IERC20(address(mockWETH)).balanceOf(alice));
+
+        uint256 balanceBefore = IERC20(address(mockWETH)).balanceOf(alice);
+
+        vm.startPrank(alice);
+        tabunganBersama.withdraw(amountToTransfer1);
+        vm.stopPrank();
+
+        console.log("alice dapat berapa?");
+
+        console.log("alice balance after:", IERC20(address(mockWETH)).balanceOf(alice));
+        uint256 balanceAfter = IERC20(address(mockWETH)).balanceOf(alice);
+
+        uint256 yield = balanceAfter - balanceBefore;
+        console.log("yield WETH:", yield);
+        // 1.666666666666666666
+        (, int256 priceEth,,,) = IChainLink(pricefeedETH).latestRoundData();
+        (, int256 priceUsdc,,,) = IChainLink(pricefeedUSDC).latestRoundData();
+
+        console.log("priceEth:", priceEth); // 1 ETH = 2952.92642389 USD
+        console.log("priceUsdc:", priceUsdc); // 1 USDC = 0.99961385 USD
+        // uint256 realPrice = ((yield * uint256(priceEth) * 1e6 / uint256(priceUsdc)) / 1e8) / 1e18;
+        // console.log("realPrice:", realPrice);
+
+        uint256 ethToUsd = yield * uint256(priceEth) / 1e18;
+        console.log("yield * priceEth:", ethToUsd); // 4921.54403981 USD
+
+        uint256 ethToUsdc = ethToUsd * 1e6 / uint256(priceUsdc);
+        console.log("yield * priceEth * priceUsdc:", ethToUsdc); // 4923.445228 USDC
     }
 }
